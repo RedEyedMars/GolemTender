@@ -1,0 +1,29 @@
+[package]
+name = "tavern-keeper"
+version = "0.1.0"
+authors = ["RedEyedMars <greg_estouffey@hotmail.com>"]
+edition = "2018"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+log = { version = "0.4.8",  features = ["max_level_debug", "release_max_level_warn"]}
+failure = "0.1"
+gl_generator = "0.14.0"
+sdl2 = { version = "0.34.0", features = ["bundled", "static-link"] }
+gl = { path = "lib/gl" }
+# auto_claw_render_gl_derive = { path = "render_gl_derive" }
+vec-2-10-10-10 = "0.1.2"
+soa_derive = "0.8.1"
+half = "1.1.1"
+image = "0.22.1"
+rayon = "1.2.0"
+rand = "0.7.3"
+
+packed_simd = "0.3.3"
+generational-arena = "0.1"
+maplit = "1.0.2"
+
+[build-dependencies]
+walkdir = "2.1"

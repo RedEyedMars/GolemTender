@@ -12,6 +12,7 @@ use sdl2::Sdl;
 use std::time::Instant;
 
 use b::Board;
+use e::gol::Golem;
 
 //use crate::packed_simd::f32x4;
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
@@ -82,10 +83,33 @@ pub enum Colour {
     Purple, // v
 }
 
+impl Colour {
+    pub fn from_varying(c: char) -> Colour {
+        match c {
+            'P' => Colour::Purple,
+            'R' => Colour::Red,
+            'B' => Colour::Blue,
+            'G' => Colour::Green,
+            _ => Colour::Purple,
+        }
+    }
+    pub fn to_varying(&self) -> char {
+        match self {
+            Colour::Blue => 'B',
+            Colour::Red => 'R',
+            Colour::Green => 'G',
+            Colour::Purple => 'P',
+        }
+    }
+}
+
 pub struct GameState {
     pub clock: Instant,
     pub event_pump: EventPump,
     pub board: Board,
+    pub board_index: usize,
+    pub boards: Vec<Board>,
+    pub golems: Vec<Golem>,
     pub viewport: Viewport,
     pub animation_state: u8,
     pub res: Resources,
@@ -93,14 +117,17 @@ pub struct GameState {
 
 pub fn setup(sdl: Sdl) -> Result<GameState, failure::Error> {
     let mut res = Resources::from_relative_exe_path("assets").unwrap();
-    let board = Board::new(8usize, 6usize, &mut res)?; // this will be the default Board::new(86usize, 64usize, &mut res)?;
+    let board = Board::new(String::from("Starting Grove"), 8usize, 6usize, &mut res)?; // this will be the default Board::new(86usize, 64usize, &mut res)?;
 
     let viewport = Viewport::for_window(900, 700);
 
     Ok(GameState {
         event_pump: sdl.event_pump().map_err(err_msg)?,
         clock: Instant::now(),
-        board,
+        board: board.clone(),
+        board_index: 0usize,
+        boards: vec![board],
+        golems: Vec::new(),
         viewport,
         animation_state: 0u8,
         res,

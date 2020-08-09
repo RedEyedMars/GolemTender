@@ -12,6 +12,9 @@ pub enum Occupant {
 impl Occupant {
     pub fn render_text(&self) {
         match self {
+            Occupant::Block(Block::StepSwitch {
+                on: Some(box Occupant::Block(Block::Block)),
+            }) => print!("b]"),
             Occupant::Block(_) => print!("b|"),
             Occupant::Golem(_) => print!("G|"),
             Occupant::Wall(_) => print!("W|"),
@@ -246,6 +249,17 @@ impl Tile {
                 })))
             }
             Tile::Empty => Ok(Tile::Occupied(occupant)),
+            _ => Err(()),
+        }
+    }
+    pub fn add_occupant_ref(&self, occupant: &Occupant) -> Result<Tile, ()> {
+        match self {
+            Tile::Occupied(Occupant::Block(Block::StepSwitch { on: None })) => {
+                Ok(Tile::Occupied(Occupant::Block(Block::StepSwitch {
+                    on: Some(Box::new(occupant.clone())),
+                })))
+            }
+            Tile::Empty => Ok(Tile::Occupied(occupant.clone())),
             _ => Err(()),
         }
     }

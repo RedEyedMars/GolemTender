@@ -17,15 +17,21 @@ pub enum Wall {
     BlockWall,
 }
 
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct Board {
-    grid_img: Img,
     tiles: Vec<Tile>,
+    pub name: String,
     pub width: usize,
     pub height: usize,
 }
 
 impl Board {
-    pub fn new(width: usize, height: usize, res: &mut Resources) -> Result<Board, failure::Error> {
+    pub fn new(
+        name: String,
+        width: usize,
+        height: usize,
+        res: &mut Resources,
+    ) -> Result<Board, failure::Error> {
         let mut tiles = Vec::with_capacity(width * height);
         for _ in 0..height {
             for _ in 0..width {
@@ -33,14 +39,16 @@ impl Board {
             }
         }
         Ok(Board {
+            /*
             grid_img: Img::new(
                 "bot_1.png".to_string(),
                 0f32,
                 SizeMode::Bot,
                 Animation::MainXShift2x16,
                 res,
-            )?,
+            )?,*/
             tiles: tiles,
+            name: name,
             width: width,
             height: height,
         })
@@ -49,7 +57,7 @@ impl Board {
         Ok(())
     }
     pub fn render(&self, game: &GameState) -> Result<(), failure::Error> {
-        self.grid_img.render(game);
+        //self.grid_img.render(game);
         Ok(())
     }
     pub fn render_text(&self) {
@@ -64,12 +72,35 @@ impl Board {
         }
         println!("===================================================");
     }
+    pub fn walls(&self) -> Vec<(&Wall, u32x2)> {
+        let mut result = Vec::new();
+        for (index, tile) in self.tiles.iter().enumerate() {
+            if let Tile::Occupied(Occupant::Wall(wall)) = tile {
+                result.push((wall, self.xy(index)));
+            }
+        }
+        result
+    }
+    pub fn blocks(&self) -> Vec<(&Block, u32x2)> {
+        let mut result = Vec::new();
+        for (index, tile) in self.tiles.iter().enumerate() {
+            if let Tile::Occupied(Occupant::Block(block)) = tile {
+                result.push((block, self.xy(index)));
+            }
+        }
+        result
+    }
+
     pub fn add_golem(&mut self, (xy, gol): (u32x2, GolemState)) -> Result<(), ()> {
         self.apply_on_tile(&gol, xy, &Tile::add_golem)?;
         Ok(())
     }
     pub fn add_block(&mut self, (xy, block): (u32x2, Block)) -> Result<(), ()> {
         self.apply_on_tile(&block, xy, &Tile::add_block)?;
+        Ok(())
+    }
+    pub fn add_occupant(&mut self, (xy, occupant): (u32x2, Occupant)) -> Result<(), ()> {
+        self.apply_on_tile(&occupant, xy, &Tile::add_occupant_ref)?;
         Ok(())
     }
 
@@ -87,6 +118,9 @@ impl Board {
 
     pub fn index(&self, xy: u32x2) -> usize {
         (xy.extract(1) as usize) * self.width + (xy.extract(0) as usize)
+    }
+    pub fn xy(&self, i: usize) -> u32x2 {
+        u32x2::new(i as u32 % self.width as u32, i as u32 / self.width as u32)
     }
 
     pub fn grab(&mut self, new_state: bool, gol_xy: u32x2) -> Result<GolemState, ()> {

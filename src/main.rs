@@ -19,6 +19,8 @@ extern crate rayon;
 
 pub mod a;
 pub mod g;
+pub mod n;
+pub mod s;
 
 use log::LevelFilter;
 use log::{Level, Metadata, Record};
@@ -46,7 +48,10 @@ pub fn main() -> Result<(), failure::Error> {
     }
     let (sdl, mut window, _gl_context) = g::setup()?;
     let mut game = a::setup(sdl)?;
-    a::benny::test_lift_and_rotate(&mut game);
+    //let mut net = n::s::node::Net::new(1024, 64, vec![4096, 4096, 2048]);
+    //a::benny::test_nn_32x32_push_performance(&mut net);
+
+    a::benny::test_read_write_file(&mut game);
     loop {
         g::preprocess();
         if !a::run(&mut game)? {

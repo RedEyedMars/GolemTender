@@ -219,3 +219,103 @@ pub fn test_lift_and_rotate(game: &mut GameState) {
     golem.act(&mut game.board);
     game.board.render_text();
 }
+
+pub fn test_nn_32x32_push_performance(net: &mut crate::n::s::node::Net) {
+    let (low, high) = (-1f32, 1f32);
+    let mut rng = rand::thread_rng();
+
+    let mut input = Vec::new();
+    for _ in 0..1024 / 16 {
+        input.push(crate::n::s::node::Cluster::random_weights((
+            &mut rng, low, high,
+        )));
+    }
+    net.input(input);
+    //net.display_full();
+    //println!("=========");
+    use std::time::Instant;
+    let clock = Instant::now();
+    let mut times = Vec::new();
+    println!("Start test");
+    for _ in 0..20 {
+        let start = clock.elapsed().as_nanos();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        net.push();
+        let end = clock.elapsed().as_nanos();
+        times.push((end - start) / 10);
+    }
+    let mut average = 0;
+    for t in times.iter() {
+        average += t;
+    }
+    println!("Push takes {}ns", average / (times.len() as u128));
+    //net.display_full();
+}
+
+pub fn test_nn_1x1_push_pull(net: &mut crate::n::s::node::Net) {
+    use rand::Rng;
+    let (low, high) = (-1f32, 1f32);
+    let mut rng = rand::thread_rng();
+    //net.display_full();
+    //println!("=========");
+    use packed_simd::f32x16;
+    use std::time::Instant;
+    let clock = Instant::now();
+    let mut times = Vec::new();
+    for _ in 0..1000 {
+        let start = clock.elapsed().as_millis();
+        let (a, b) = (rng.gen_range(low, high), rng.gen_range(low, high));
+        if a == 0.0 || b == 0.0 {
+            continue;
+        }
+        net.input(vec![f32x16::new(
+            a, b, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        )]);
+        net.push();
+        net.pull(vec![f32x16::new(
+            a * b,
+            a / b,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+        )]);
+        let end = clock.elapsed().as_millis();
+        times.push((end - start));
+    }
+    let mut average = 0;
+    for t in times.iter() {
+        average += t;
+    }
+    println!("Push Pull takes {}ms", average / (times.len() as u128));
+    //net.display_full();
+}
+
+pub fn test_read_file(game: &mut crate::a::GameState) {
+    use crate::s::l::read_level;
+    read_level("test_a", game).expect("Found error");
+}
+
+pub fn test_read_write_file(game: &mut crate::a::GameState) {
+    use crate::s::l::{read_level, save_level};
+    read_level("test_b", game).expect("Found error");
+    save_level("test_c", game).expect("Found error");
+}

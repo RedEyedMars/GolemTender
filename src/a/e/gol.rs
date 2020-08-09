@@ -2,6 +2,7 @@
 use packed_simd::u32x2;
 
 use crate::a::b::blocks::Item;
+use crate::a::b::tiles::Occupant;
 use crate::a::b::Board;
 use crate::a::e::runes::RuneArrangement;
 use crate::a::{Colour, Direction};
@@ -106,6 +107,19 @@ pub struct Golem {
 }
 
 impl Golem {
+    pub fn new_basic(xy: u32x2, direction: Direction, colour: Colour) -> Golem {
+        Golem {
+            position: xy,
+            state: GolemState::State {
+                direction: direction,
+                colour: colour,
+                carrying: None,
+                grabbing: false,
+            },
+            runes: Vec::new(),
+            selected_arrangement: Vec::new(),
+        }
+    }
     pub fn new_with_direction(xy: u32x2, direction: Direction) -> Golem {
         Golem {
             position: xy,
@@ -119,6 +133,22 @@ impl Golem {
             selected_arrangement: Vec::new(),
         }
     }
+    pub fn get_arrangement(&self) -> &Vec<RuneArrangement> {
+        &self.runes
+    }
+    pub fn get_colour(&self) -> Colour {
+        match &self.state {
+            GolemState::State { colour: c, .. } => c.clone(),
+        }
+    }
+    pub fn get_direction(&self) -> Direction {
+        match &self.state {
+            GolemState::State { direction: d, .. } => d.clone(),
+        }
+    }
+    pub fn get_position(&self) -> u32x2 {
+        self.position.clone()
+    }
     pub fn add_arrangement(&mut self, ra: RuneArrangement) {
         self.runes.push(ra);
         if self.selected_arrangement.len() == 0 {
@@ -127,6 +157,9 @@ impl Golem {
     }
     pub fn boarding(&self) -> (u32x2, GolemState) {
         (self.position.clone(), self.state.clone())
+    }
+    pub fn boarding_occ(&self) -> (u32x2, Occupant) {
+        (self.position.clone(), Occupant::Golem(self.state.clone()))
     }
     pub fn selected(&self) -> usize {
         self.selected_arrangement

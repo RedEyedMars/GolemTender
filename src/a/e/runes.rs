@@ -87,6 +87,25 @@ pub struct Rune {
 }
 
 impl Rune {
+    pub fn get_action(&self) -> &Option<ActionGlyph> {
+        &self.action
+    }
+    pub fn get_action_times(&self) -> u8 {
+        self.action_times
+    }
+    pub fn get_condition(&self) -> &Vec<ConditionGlyph> {
+        &self.condition
+    }
+    pub fn get_manip(&self) -> &Option<ArrangementManipGlyph> {
+        &self.manip
+    }
+    pub fn get_manip_times(&self) -> u8 {
+        match self.manip {
+            Some(ArrangementManipGlyph::Next { times }) => times,
+            Some(ArrangementManipGlyph::Previous { times }) => times,
+            _ => 0,
+        }
+    }
     pub fn basic(action: ActionGlyph, times: u8) -> Rune {
         Rune {
             action: Some(action),
@@ -119,7 +138,7 @@ impl Rune {
     }
 }
 
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct RuneArrangement {
     id: usize,
     selected_rune: usize,
@@ -137,6 +156,9 @@ impl RuneArrangement {
             caller: None,
             on_repeat: false,
         }
+    }
+    pub fn get_runes(&self) -> &Vec<Rune> {
+        &self.runes
     }
     pub fn add(&mut self, rune: Rune) {
         self.runes.push(rune);

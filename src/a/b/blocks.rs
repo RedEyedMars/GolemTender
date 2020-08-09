@@ -124,4 +124,7 @@ impl Block {
     pub fn boarding(&self, xy: u32x2) -> (u32x2, Block) {
         (xy, self.clone())
     }
+    pub fn boarding_occ(&self, xy: u32x2) -> (u32x2, Occupant) {
+        (xy, Occupant::Block(self.clone()))
+    }
 }

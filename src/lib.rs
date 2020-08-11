@@ -1,6 +1,5 @@
 #![feature(stmt_expr_attributes)]
 #![feature(box_syntax, box_patterns)]
-#![feature(start)]
 #[macro_use]
 extern crate failure;
 #[macro_use]
@@ -18,8 +17,21 @@ pub mod n;
 pub mod s;
 pub mod w;
 
-#[start]
-pub fn main(argc: isize, argv: *const *const u8) -> isize {
+use wasm_bindgen::prelude::*;
+
+// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
+// allocator.
+#[cfg(feature = "wee_alloc")]
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+#[wasm_bindgen]
+extern {
+    fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn begin() {
     let mut context = w::g::setup();
     let mut game = a::setup(context).expect("game did not setup properly");
     //let mut net = n::s::node::Net::new(1024, 64, vec![4096, 4096, 2048]);
@@ -33,5 +45,4 @@ pub fn main(argc: isize, argv: *const *const u8) -> isize {
     }
     //g::postprocess(&mut window);
     //}
-    0
 }

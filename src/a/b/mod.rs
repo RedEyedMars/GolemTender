@@ -1,7 +1,5 @@
 use crate::a::GameState;
-use crate::g::animation::animaton::{Animation, SizeMode};
-use crate::g::animation::img::Img;
-use crate::g::resources::Resources;
+use crate::w::g::res::Resources;
 
 use crate::a::e::gol::GolemState;
 use crate::a::*;

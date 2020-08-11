@@ -5,26 +5,45 @@ use crate::a::e::gol::Golem;
 use crate::a::e::runes::{ActionGlyph, ArrangementManipGlyph, Rune, RuneArrangement};
 use crate::a::GameState;
 use crate::a::{Colour, Direction};
-use crate::g::resources::Resources;
 use crate::s::{tokenize, Token};
 use crate::s::{ConditionRuneToken, RuneToken};
+use crate::w::g::res::Resources;
 
 use packed_simd::u32x2;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn fetch_level(filename: &str) -> String {
+    String::from_utf8(nodejs_helper::fs::read_file_sync(&filename)).unwrap()
+}
 
 pub fn read_level(level_name: &str, game: &mut GameState) -> Result<(), failure::Error> {
     let mut filename = String::from("./res/levels/");
     filename.push_str(level_name);
     filename.push_str(".lvl");
+    read_level_from_string(
+        //&crate::s::read_file(filename.as_str()).unwrap().into_bytes(),
+        fetch_level(filename.as_str()),
+        game,
+    )
+}
+
+#[no_mangle]
+pub fn read_level_from_string(
+    filecontents: String,
+    game: &mut GameState,
+) -> Result<(), failure::Error> {
     game.boards = Vec::with_capacity(512);
     game.golems = Vec::with_capacity(8184);
     let mut board_len = 0usize;
-    for l in crate::s::read_file(filename.as_str()).unwrap().lines() {
+    for l in filecontents.lines() {
         board_len = read_level_line(l, board_len, game)?;
     }
     if game.boards.len() > 0 {
         game.board_index = 0usize;
         game.board = game.boards.get(game.board_index).unwrap().clone();
     }
+    println!("Complete?");
     Ok(())
 }
 

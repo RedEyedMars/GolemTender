@@ -2,6 +2,7 @@
 use crate::a::GameState;
 
 pub fn detect_input(game: &mut GameState) -> Result<bool, failure::Error> {
+    /*
     for event in game.event_pump.poll_iter() {
         match event {
             sdl2::event::Event::Quit { .. } => return Ok(true),
@@ -24,5 +25,6 @@ pub fn detect_input(game: &mut GameState) -> Result<bool, failure::Error> {
             _ => {}
         }
     }
+    */
     Ok(false)
 }

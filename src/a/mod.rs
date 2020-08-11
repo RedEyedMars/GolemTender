@@ -5,10 +5,7 @@ pub mod benny;
 pub mod e;
 mod input;
 
-use crate::g::render_gl::Viewport;
-use crate::g::resources::Resources;
-use sdl2::EventPump;
-use sdl2::Sdl;
+use crate::w::g::res::Resources;
 use std::time::Instant;
 
 use b::Board;
@@ -104,31 +101,25 @@ impl Colour {
 }
 
 pub struct GameState {
-    pub clock: Instant,
-    pub event_pump: EventPump,
+    //pub clock: Instant,
     pub board: Board,
     pub board_index: usize,
     pub boards: Vec<Board>,
     pub golems: Vec<Golem>,
-    pub viewport: Viewport,
     pub animation_state: u8,
     pub res: Resources,
 }
 
-pub fn setup(sdl: Sdl) -> Result<GameState, failure::Error> {
-    let mut res = Resources::from_relative_exe_path("assets").unwrap();
+pub fn setup(context: crate::w::g::Context) -> Result<GameState, failure::Error> {
+    let mut res = context.assets();
     let board = Board::new(String::from("Starting Grove"), 8usize, 6usize, &mut res)?; // this will be the default Board::new(86usize, 64usize, &mut res)?;
 
-    let viewport = Viewport::for_window(900, 700);
-
     Ok(GameState {
-        event_pump: sdl.event_pump().map_err(err_msg)?,
-        clock: Instant::now(),
+        //clock: Instant::now(),
         board: board.clone(),
         board_index: 0usize,
         boards: vec![board],
         golems: Vec::new(),
-        viewport,
         animation_state: 0u8,
         res,
     })
@@ -139,7 +130,7 @@ pub fn run(game: &mut GameState) -> Result<bool, failure::Error> {
         return Ok(false);
     }
 
-    game.animation_state = (game.clock.elapsed().as_millis() / 400 % 2) as u8;
+    //game.animation_state = (game.clock.elapsed().as_millis() / 400 % 2) as u8;
     game.board.execute()?;
     game.board.render(&game)?;
     //
